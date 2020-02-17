@@ -9,6 +9,7 @@ import aima.alocar_aulas.constraint.HorarioDiasDiferentesConstraint;
 import aima.alocar_aulas.constraint.HorarioDiasIguasConstraint;
 import aima.alocar_aulas.constraint.HorarioDisciplinaConstraint;
 import aima.alocar_aulas.constraint.PreferenciaDisciplinaProfessorConstraint;
+import aima.alocar_aulas.constraint.TurmaFixaConstraint;
 import aima.alocar_aulas.constraint.TurmaProfessorConstraint;
 import aima.core.search.csp.CSP;
 import aima.core.search.csp.Domain;
@@ -67,7 +68,7 @@ public class AlocaTurma extends CSP<Variable, String> {
 		habilidades.put("Mia", new Integer[] { 0, 1 });
 		habilidades.put("Robert", new Integer[] { 6, 2 });
 
-		// Horários
+		// Horï¿½rios
 
 		List<Variable> horarios = new ArrayList<Variable>();
 
@@ -81,7 +82,7 @@ public class AlocaTurma extends CSP<Variable, String> {
 
 		for (int i = 0; i < valoresDisciplina.length; i++) {
 
-			// Add variável para cada disciplina e seta seu dominio com todos disciplinas
+			// Add variavel para cada disciplina e seta seu dominio com todos disciplinas
 
 			Variable disciplina = new Variable("D" + (i + 1));
 			addVariable(disciplina);
@@ -89,14 +90,14 @@ public class AlocaTurma extends CSP<Variable, String> {
 
 			disciplinas.add(disciplina);
 
-			// Add variável professor para cada disciplina, e seta seu dominio como
+			// Add variavel professor para cada disciplina, e seta seu dominio como
 			// professores
 
 			Variable professor = new Variable("P_" + disciplina.getName());
 			addVariable(professor);
 			setDomain(professor, new Domain<String>(professores));
 
-			// Um professor só pode ministrar uma disciplina que prefere ou tem habilidade
+			// Um professor so pode ministrar uma disciplina que prefere ou tem habilidade
 
 			addConstraint(new PreferenciaDisciplinaProfessorConstraint(professor, disciplina, preferencias, habilidades,
 					valoresDisciplina));
@@ -107,7 +108,7 @@ public class AlocaTurma extends CSP<Variable, String> {
 
 			for (int j = 0; j < valoresAula[i]; j++) {
 
-				// Horário para cada aula
+				// Horario para cada aula
 
 				Variable horario = new Variable("H" + (j + 1) + "_" + disciplina.getName());
 				addVariable(horario);
@@ -120,30 +121,35 @@ public class AlocaTurma extends CSP<Variable, String> {
 			turmas.add(turma);
 		}
 
-		// Cada disciplina só pode ter uma turma
+		// Cada disciplina so pode ter uma turma
 
 		addConstraint(new AllDifferentConstraint(disciplinas));
 
-		// Os horarios de um professor não podem repetir
+		// Os horarios de um professor nao podem repetir
 
 		for (int i = 0; i < professores.length; i++) {
 			addConstraint(new TurmaProfessorConstraint(turmas, professores[i]));
 		}
 
-		for (Turma horario1 : turmas) {
+		for (Turma turma1 : turmas) {
 
-			for (Turma horario2 : turmas) {
+			// Turma de fora do departamento sempre tem horario fixo
 
-				if (!horario1.getDisciplina().getName().equals(horario2.getDisciplina().getName())) {
+			addConstraint(new TurmaFixaConstraint(turma1, valoresDisciplina[1], valoresHorarios[16],
+					valoresHorarios[17], valoresHorarios[28], valoresHorarios[29]));
 
-					for (int i = 0; i < horario1.getHorarios().size(); i++) {
+			for (Turma turma2 : turmas) {
 
-						for (int j = 0; j < horario2.getHorarios().size(); j++) {
+				if (!turma1.getDisciplina().getName().equals(turma2.getDisciplina().getName())) {
 
-							// Disciplinas de mesmo não podem ter as aulas no mesmo horário
+					for (int i = 0; i < turma1.getHorarios().size(); i++) {
 
-							addConstraint(new HorarioDisciplinaConstraint(horario1.getDisciplina(),
-									horario1.getHorarios().get(i), horario2.getDisciplina(), horario2.getHorarios().get(j)));
+						for (int j = 0; j < turma2.getHorarios().size(); j++) {
+
+							// Disciplinas nao podem ter as aulas no mesmo horario
+
+							addConstraint(new HorarioDisciplinaConstraint(turma1.getDisciplina(),
+									turma1.getHorarios().get(i), turma2.getDisciplina(), turma2.getHorarios().get(j)));
 						}
 					}
 				}
@@ -161,7 +167,7 @@ public class AlocaTurma extends CSP<Variable, String> {
 
 					horario2 = turma.getHorarios().get(++i);
 
-					// Uma turma tem que ter um minimo de aulas seguidas num dia
+					// Uma turma tem que ter um minimo de 2 aulas seguidas num dia
 
 					addConstraint(new HorarioDiasIguasConstraint(horario1, horario2));
 				}
@@ -181,7 +187,7 @@ public class AlocaTurma extends CSP<Variable, String> {
 				else if ((i + 2) < turma.getHorarios().size())
 					horario2 = turma.getHorarios().get(2 + i);
 
-				// Uma turma tem que ter um máximo de aulas seguidas num dia
+				// Uma turma tem que ter um maximo de aulas seguidas num dia
 
 				addConstraint(new HorarioDiasDiferentesConstraint(horario1, horario2, dias));
 			}

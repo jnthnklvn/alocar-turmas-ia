@@ -41,11 +41,16 @@ public class HorariosCspApp extends IntegrableApplication {
 		FlexibleBacktrackingSolver<Variable, String> fBSolver = new FlexibleBacktrackingSolver<>();
 		AlocaTurma alocaTurma = new AlocaTurma();
 		Optional<Assignment<Variable, String>> solucao = fBSolver.solve(alocaTurma);
-		solucao.ifPresent(System.out::println);
+
+		if (solucao.isPresent()) {
+			String sol = solucao.get().toString().replace(", P", ":\n\nP").replace(", D", "\n\nD").replace(", ", "\n");
+			System.out.println(sol.substring(1, sol.length() - 1));
+		}
+
 		double fim = System.currentTimeMillis();
 		System.out.println("\nTempo: " + (fim - inicio));
 
-		launch(args);
+		// launch(args);
 	}
 
 	private final static String PARAM_STRATEGY = "strategy";
