@@ -146,7 +146,7 @@ public class AlocaTurma extends CSP<Variable, String> {
 
 						for (int j = 0; j < turma2.getHorarios().size(); j++) {
 
-							// Disciplinas nao podem ter as aulas no mesmo horario
+							// Turmas diferentes nao podem ter as aulas no mesmo horario
 
 							addConstraint(new HorarioDisciplinaConstraint(turma1.getDisciplina(),
 									turma1.getHorarios().get(i), turma2.getDisciplina(), turma2.getHorarios().get(j)));
