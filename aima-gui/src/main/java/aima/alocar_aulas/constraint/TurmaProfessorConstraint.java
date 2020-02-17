@@ -21,7 +21,7 @@ public class TurmaProfessorConstraint implements Constraint<Variable, String> {
 		this.professor = professor;
 
 		for (Turma turma : turmas) {
-
+			
 			this.scope.add(turma.getProfessor());
 
 			for (Variable horario : turma.getHorarios()) {
@@ -43,12 +43,12 @@ public class TurmaProfessorConstraint implements Constraint<Variable, String> {
 
 		List<Variable> list = new ArrayList<Variable>();
 
-		for (Turma timeturma : turmas) {
+		for (Turma turma : turmas) {
 
-			String prof = (String) assignment.getValue(timeturma.getProfessor());
+			String prof = (String) assignment.getValue(turma.getProfessor());
 
 			if (prof != null && prof.equals(professor)) {
-				list.addAll(timeturma.getHorarios());
+				list.addAll(turma.getHorarios());
 			}
 		}
 
