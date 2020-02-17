@@ -68,7 +68,7 @@ public class AlocaTurma extends CSP<Variable, String> {
 		habilidades.put("Mia", new Integer[] { 0, 1 });
 		habilidades.put("Robert", new Integer[] { 6, 2 });
 
-		// Hor�rios
+		// Horarios
 
 		List<Variable> horarios = new ArrayList<Variable>();
 
@@ -187,7 +187,7 @@ public class AlocaTurma extends CSP<Variable, String> {
 				else if ((i + 2) < turma.getHorarios().size())
 					horario2 = turma.getHorarios().get(2 + i);
 
-				// Uma turma tem que ter um maximo de aulas seguidas num dia
+				// Uma turma tem que ter um maximo de 2 aulas a cada 2 dias
 
 				addConstraint(new HorarioDiasDiferentesConstraint(horario1, horario2, dias));
 			}

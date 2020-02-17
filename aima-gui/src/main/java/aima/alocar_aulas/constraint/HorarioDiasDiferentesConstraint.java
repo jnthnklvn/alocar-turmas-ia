@@ -49,21 +49,18 @@ public class HorarioDiasDiferentesConstraint implements Constraint<Variable, Str
 		
 		List<String> lista = new ArrayList<String>(Arrays.asList(dias));
 		
-		String valueHorario1 = (String) assignment.getValue(horario1);
-		String valueHorario2 = (String) assignment.getValue(horario2);
+		String valueDia1 = (String) assignment.getValue(horario1);
+		String valueDia2 = (String) assignment.getValue(horario2);
 		
-		if (valueHorario1 != null && valueHorario2 != null) {
+		if (valueDia1 != null && valueDia2 != null) {
 			
-			String dia1 = valueHorario1.split("_")[0];
-			String dia2 = valueHorario2.split("_")[0];
+			String dia1 = valueDia1.split("_")[0];
+			String dia2 = valueDia2.split("_")[0];
 			
 			int indexDia1 = lista.indexOf(dia1);
 			int indexDia2 = lista.indexOf(dia2);
 			
-			if (dia1.equals(dia2))
-				return false;
-			
-			if (indexDia1 + indexDia2 < 2)
+			if (Math.max(indexDia1, indexDia2) - Math.min(indexDia1, indexDia2) < 2)
 				return false;
 		}
 		
