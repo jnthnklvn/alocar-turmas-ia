@@ -23,9 +23,9 @@ public class AlocaTurma extends CSP<Variable, String> {
 
 	// Dominio: Disciplinas
 
-	String[] valoresDisciplina = { "Banco de Dados I", "Eletrônica I", "Engenharia de Software II",
-			"Inteligência Artificial", "Laboratório de Redes de Computadores", "Programação Paralela e Concorrente",
-			"Sistemas Distribuídos" };
+	String[] valoresDisciplina = { "Banco de Dados I", "Eletronica I", "Engenharia de Software II",
+			"Inteligencia Artificial", "Laboratorio de Redes de Computadores", "Programacao Paralela e Concorrente",
+			"Sistemas Distribuidos" };
 
 	// Dominio: Horarios
 
