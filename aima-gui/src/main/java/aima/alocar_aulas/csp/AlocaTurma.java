@@ -3,7 +3,7 @@ package aima.alocar_aulas.csp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
+import aima.alocar_aulas.database.Conn;
 import aima.alocar_aulas.constraint.AllDifferentConstraint;
 import aima.alocar_aulas.constraint.HorarioDiasDiferentesConstraint;
 import aima.alocar_aulas.constraint.HorarioDiasIguasConstraint;
@@ -18,6 +18,7 @@ import aima.core.search.csp.Variable;
 public class AlocaTurma extends CSP<Variable, String> {
 
 	// Dominio: Professores
+	Conn conexao = new  Conn("PostgreSql","localhost","5432","db1","postgress","Qmasbsi4.");
 
 	String[] professores = { "Walter", "Elena", "Evelyn", "Mia", "Robert" };
 

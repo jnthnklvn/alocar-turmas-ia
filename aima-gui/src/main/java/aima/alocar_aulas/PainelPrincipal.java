@@ -1,11 +1,13 @@
 package aima.alocar_aulas;
 
+
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import aima.alocar_aulas.database.Conn;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -19,6 +21,8 @@ import javax.swing.border.EmptyBorder;
 
 public class PainelPrincipal extends JFrame {
 	private static final long serialVersionUID = 1L;
+
+
 
 	String currentProfessor;
 	String[] professores = { "Walter", "Elena", "Evelyn", "Mia", "Robert" };
