@@ -442,7 +442,7 @@ public class PainelPrincipal extends JFrame {
 		bttnInicar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if ( professores.size() > 6){
+				if ( professores.size() > 4){
 					start();
 				}
 
