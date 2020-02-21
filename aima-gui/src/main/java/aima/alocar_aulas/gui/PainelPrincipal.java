@@ -1,27 +1,21 @@
 package aima.alocar_aulas.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Vector;
 
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import aima.alocar_aulas.csp.AlocaTurma;
+import aima.alocar_aulas.database.Conn;
 import aima.alocar_aulas.model.ProfessorAndDisciplinas;
 import aima.core.search.csp.Assignment;
 import aima.core.search.csp.FlexibleBacktrackingSolver;
@@ -29,11 +23,11 @@ import aima.core.search.csp.Variable;
 
 public class PainelPrincipal extends JFrame {
 	private static final long serialVersionUID = 1L;
-
+	Conn conexao = new Conn("PostgreSql","localhost","5432","alocar_aulas","postgres","Qmasbsi45.");
 	private String currentProfessor;
 	private List<String> professores = new ArrayList<String>();
 	private final String[] professoresPadroes = { "Walter", "Elena", "Evelyn", "Steve", "Mia", "Robert", "Lana" };
-
+	private List<String> professores_query = new ArrayList<String>();
 	private List<ProfessorAndDisciplinas> preferenciasProfessores = new ArrayList<ProfessorAndDisciplinas>();
 
 	private List<ProfessorAndDisciplinas> habilidadesProfessores = new ArrayList<ProfessorAndDisciplinas>();
@@ -88,7 +82,7 @@ public class PainelPrincipal extends JFrame {
 		return false;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws SQLException {
 		frame = new PainelPrincipal();
 		frame.setVisible(true);
 	}
@@ -110,19 +104,27 @@ public class PainelPrincipal extends JFrame {
 		return result;
 	}
 
-	private PainelPrincipal() {
-		for (int i = 0; i < professoresPadroes.length; i++) {
+	private PainelPrincipal() throws SQLException {
+		conexao.connect();
+
+		ResultSet result = conexao.query("Select nome from professor");
+		while (result.next()) {
+			professores_query.add(result.getString(1));
+		}
+
+		for (int i = 0; i < professores_query.size(); i++) {
 			List<Integer> habs = new ArrayList<Integer>();
-			habs.add(professoresPadroes.length - 1 - i);
-			professores.add(professoresPadroes[i]);
+			habs.add(professores_query.size() - 1 - i);
+			professores.add(professores_query.get(i));
 			preferenciasProfessores.add(new ProfessorAndDisciplinas(i, new ArrayList<Integer>()));
 			habilidadesProfessores.add(new ProfessorAndDisciplinas(i, habs));
 		}
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setTitle("Alocar Disciplinas");
-		setSize(1200, 720);
+		setSize(1500, 720);
 		setMinimumSize(getSize());
+		setMaximumSize(getSize());
 
 		createMenuBar();
 
@@ -138,11 +140,12 @@ public class PainelPrincipal extends JFrame {
 		painelPrincipal.add(getResultPainel());
 
 		validate();
+		conexao.disconnect();
 	}
 
 	public JPanel getPainelInicial() {
 		JPanel painelInicial = new JPanel();
-		painelInicial.setBounds(5, 75, 1175, 400);
+		painelInicial.setBounds(5, 75, 1400, 400);
 		painelInicial.setLayout(new BoxLayout(painelInicial, BoxLayout.Y_AXIS));
 
 		JLabel vazio = new JLabel("\n");
@@ -246,15 +249,38 @@ public class PainelPrincipal extends JFrame {
 
 	public JPanel getPainelSelecao() {
 		JPanel painelSelecao = new JPanel();
-		painelSelecao.setBounds(5, 5, 1175, 35);
-
+		final JPanel parent = painelSelecao;
+		JButton button = new JButton();
+		button.setText("Clique para adicionar professores");
+		parent.add(button);
+		parent.setVisible(true);
 		/*
 		 * Preferencias professor
 		 */
 		// ComboBox para selecionar professor
-		cbProfessor = new JComboBox<String>(professoresPadroes);
-		cbProfessor.setEditable(true);
-		currentProfessor = professoresPadroes[0];
+		String[] array = professores_query.toArray(new String[professores_query.size()]);
+		cbProfessor = new JComboBox<String>(array);
+		cbProfessor.setEditable(false);
+		String query = " insert into professor (nome, preferencia_disciplina)"
+				+ " values (?, ?)";
+		button.addActionListener(evt -> {
+			conexao.connect();
+			String name = JOptionPane.showInputDialog(parent,
+					"Qual o nome do professor?", null);
+			try {
+				PreparedStatement preparedStmt = conexao.prepareStatement(query);
+				preparedStmt.setString (1, name);
+				preparedStmt.setString (2, "Rubble");
+				preparedStmt.execute();
+				cbProfessor.addItem(name);
+			}catch (SQLException e) {
+				e.printStackTrace();
+			}
+			conexao.disconnect();
+		});
+		painelSelecao.setBounds(5, 5, 1500, 35);
+
+
 
 		cbProfessor.addActionListener(new ActionListener() {
 			@Override
@@ -262,7 +288,26 @@ public class PainelPrincipal extends JFrame {
 				currentProfessor = (String) cbProfessor.getSelectedItem();
 			}
 		});
+
 		painelSelecao.add(cbProfessor);
+		JButton button2 = new JButton();
+		button2.setText("X");
+		button2.setMargin(new Insets(0, 0, 0, 0));
+		painelSelecao.add(button2);
+		String query2 = " delete from professor where nome ="
+				+ " ?";
+		button2.addActionListener(evt -> {
+			conexao.connect();
+			try {
+				PreparedStatement preparedStmt = conexao.prepareStatement(query2);
+				preparedStmt.setString (1, (String) cbProfessor.getSelectedItem());
+				preparedStmt.execute();
+				cbProfessor.removeItem(cbProfessor.getSelectedItem());
+			}catch (SQLException e) {
+				e.printStackTrace();
+			}
+			conexao.disconnect();
+		});
 
 		// Label de preferencia do professor
 		JLabel labelPreferencia = new JLabel("tem ");

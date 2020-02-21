@@ -129,4 +129,7 @@ public class Conn {
         this.driverjdbc = driverjdbc;
     }
 
+    public PreparedStatement prepareStatement(String query) throws SQLException {
+        return getC().prepareStatement(query);
+    }
 }
