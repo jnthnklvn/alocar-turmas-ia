@@ -75,39 +75,6 @@ public class SQLiteJDBCDriverConnection {
 			statement.execute(
 					"insert into Habilidades (disciplina,professor_id)  values ('Engenharia de Software II',5)");
 
-			// lendo os registros
-			PreparedStatement stmt = connection.prepareStatement("select * from Professor");
-			ResultSet resultSet = stmt.executeQuery();
-
-			while (resultSet.next()) {
-				Integer id = resultSet.getInt("id");
-				String nome = resultSet.getString("nome");
-
-				System.out.println(id + " - " + nome);
-			}
-			// lendo os registros
-			stmt = connection.prepareStatement("select * from Habilidades");
-			resultSet = stmt.executeQuery();
-
-			while (resultSet.next()) {
-				Integer id = resultSet.getInt("id");
-				String disciplina = resultSet.getString("disciplina");
-				Integer idProfessor = resultSet.getInt("professor_id");
-
-				System.out.println(id + " - " + disciplina + " - " + idProfessor);
-			}
-			// lendo os registros
-			stmt = connection.prepareStatement("select * from Preferencias");
-			resultSet = stmt.executeQuery();
-
-			while (resultSet.next()) {
-				Integer id = resultSet.getInt("id");
-				String disciplina = resultSet.getString("disciplina");
-				Integer idProfessor = resultSet.getInt("professor_id");
-
-				System.out.println(id + " - " + disciplina + " - " + idProfessor);
-			}
-
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
