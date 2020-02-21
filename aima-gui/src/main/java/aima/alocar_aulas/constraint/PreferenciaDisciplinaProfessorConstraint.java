@@ -15,9 +15,10 @@ public class PreferenciaDisciplinaProfessorConstraint implements Constraint<Vari
 	private Variable disciplina;
 	private Map<String, Integer[]> prefs;
 	private Map<String, Integer[]> skills;
+	private String[] professores;
 	private String[] disciplinas;
 	
-	public PreferenciaDisciplinaProfessorConstraint(Variable professor, Variable disciplina, Map<String, Integer[]> prefs, Map<String, Integer[]> skills, String[] disciplinas) {
+	public PreferenciaDisciplinaProfessorConstraint(Variable professor, String[] professores, Variable disciplina, Map<String, Integer[]> prefs, Map<String, Integer[]> skills, String[] disciplinas) {
 		this.scope = new ArrayList<Variable>();
 		this.scope.add(professor);
 		this.scope.add(disciplina);
@@ -26,6 +27,7 @@ public class PreferenciaDisciplinaProfessorConstraint implements Constraint<Vari
 		this.prefs = prefs;
 		this.skills = skills;
 		this.disciplinas = disciplinas;
+		this.professores = professores;
 	}
 	
 	@Override
@@ -40,11 +42,11 @@ public class PreferenciaDisciplinaProfessorConstraint implements Constraint<Vari
 	public Map<String, Integer[]> getSkills() {
 		return skills;
 	}
-	
+		
 	public Integer[] getPreferencias(String key) {
 		return prefs.get(key);
 	}
-	
+		
 	public Integer[] getHabilidades(String key) {
 		return skills.get(key);
 	}
@@ -88,9 +90,18 @@ public class PreferenciaDisciplinaProfessorConstraint implements Constraint<Vari
 		if (valueDisciplina != null) {
 		
 			if (professor.getName().endsWith(disciplina.getName())) {
-				
 				if (valueProfessor != null) {
-					return prefereDisciplina(valueProfessor, valueDisciplina) || podeMinistrarDisciplina(valueProfessor, valueDisciplina);
+					if (!podeMinistrarDisciplina(valueProfessor, valueDisciplina)) {
+						return false;
+					}
+					if (prefereDisciplina(valueProfessor, valueDisciplina)) {
+						return true;
+					}
+					for (String professor : professores) {
+						if (prefereDisciplina(professor, valueDisciplina) && podeMinistrarDisciplina(professor, valueDisciplina)) {
+							return false;
+						}
+					}
 				}
 			}
 		}

@@ -11,15 +11,12 @@ import aima.alocar_aulas.constraint.HorarioDisciplinaConstraint;
 import aima.alocar_aulas.constraint.PreferenciaDisciplinaProfessorConstraint;
 import aima.alocar_aulas.constraint.TurmaFixaConstraint;
 import aima.alocar_aulas.constraint.TurmaProfessorConstraint;
+import aima.alocar_aulas.model.ProfessorAndDisciplinas;
 import aima.core.search.csp.CSP;
 import aima.core.search.csp.Domain;
 import aima.core.search.csp.Variable;
 
 public class AlocaTurma extends CSP<Variable, String> {
-
-	// Dominio: Professores
-
-	String[] professores = { "Walter", "Elena", "Evelyn", "Mia", "Robert" };
 
 	// Dominio: Disciplinas
 
@@ -54,19 +51,22 @@ public class AlocaTurma extends CSP<Variable, String> {
 
 	HashMap<String, Integer[]> habilidades = new HashMap<String, Integer[]>();
 
-	public AlocaTurma() {
+	public AlocaTurma(List<String> newProfessores, List<ProfessorAndDisciplinas> newPreferencias,
+			List<ProfessorAndDisciplinas> newHabilidades, String hTFixa1, String hTFixa2, String hTFixa3,
+			String hTFixa4) {
+		String[] professores = newProfessores.toArray(new String[0]);
 
-		preferencias.put("Walter", new Integer[] { 4, 6 });
-		preferencias.put("Elena", new Integer[] { 4 });
-		preferencias.put("Evelyn", new Integer[] { 5, 0 });
-		preferencias.put("Mia", new Integer[] { 0 });
-		preferencias.put("Robert", new Integer[] { 2, 6 });
+		double inicio = System.currentTimeMillis();
 
-		habilidades.put("Walter", new Integer[] { 4, 6 });
-		habilidades.put("Elena", new Integer[] { 3, 4 });
-		habilidades.put("Evelyn", new Integer[] { 5, 0 });
-		habilidades.put("Mia", new Integer[] { 0, 1 });
-		habilidades.put("Robert", new Integer[] { 6, 2 });
+		for (ProfessorAndDisciplinas pAp : newPreferencias) {
+			if (pAp.getDisciplinas().size() > 0) {
+				preferencias.put(newProfessores.get(pAp.getProfessor()), pAp.getDisciplinas().toArray(new Integer[0]));
+			}
+		}
+
+		for (ProfessorAndDisciplinas pAp : newHabilidades) {
+			habilidades.put(newProfessores.get(pAp.getProfessor()), pAp.getDisciplinas().toArray(new Integer[0]));
+		}
 
 		// Horarios
 
@@ -99,8 +99,8 @@ public class AlocaTurma extends CSP<Variable, String> {
 
 			// Um professor so pode ministrar uma disciplina que prefere ou tem habilidade
 
-			addConstraint(new PreferenciaDisciplinaProfessorConstraint(professor, disciplina, preferencias, habilidades,
-					valoresDisciplina));
+			addConstraint(new PreferenciaDisciplinaProfessorConstraint(professor, professores, disciplina, preferencias,
+					habilidades, valoresDisciplina));
 
 			// Turma: 1 professor, 1 disciplina, n horarios
 
@@ -135,8 +135,7 @@ public class AlocaTurma extends CSP<Variable, String> {
 
 			// Turma de fora do departamento sempre tem horario fixo
 
-			addConstraint(new TurmaFixaConstraint(turma1, valoresDisciplina[1], valoresHorarios[16],
-					valoresHorarios[17], valoresHorarios[28], valoresHorarios[29]));
+			addConstraint(new TurmaFixaConstraint(turma1, valoresDisciplina[1], hTFixa1, hTFixa2, hTFixa3, hTFixa4));
 
 			for (Turma turma2 : turmas) {
 
@@ -192,5 +191,6 @@ public class AlocaTurma extends CSP<Variable, String> {
 				addConstraint(new HorarioDiasDiferentesConstraint(horario1, horario2, dias));
 			}
 		}
+		System.out.println("Tempo de formulação: " + (System.currentTimeMillis() - inicio) + "\n");
 	}
 }
