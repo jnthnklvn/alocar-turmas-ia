@@ -1,0 +1,473 @@
+package aima.alocar_aulas.gui;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.border.EmptyBorder;
+
+import aima.alocar_aulas.csp.AlocaTurma;
+import aima.alocar_aulas.model.ProfessorAndDisciplinas;
+import aima.core.search.csp.Assignment;
+import aima.core.search.csp.FlexibleBacktrackingSolver;
+import aima.core.search.csp.Variable;
+
+public class PainelPrincipal extends JFrame {
+	private static final long serialVersionUID = 1L;
+
+	private String currentProfessor;
+	private List<String> professores = new ArrayList<String>();
+	private final String[] professoresPadroes = { "Walter", "Elena", "Evelyn", "Steve", "Mia", "Robert", "Lana" };
+
+	private List<ProfessorAndDisciplinas> preferenciasProfessores = new ArrayList<ProfessorAndDisciplinas>();
+
+	private List<ProfessorAndDisciplinas> habilidadesProfessores = new ArrayList<ProfessorAndDisciplinas>();
+
+	private String currentDisciplina;
+	private final String[] disciplinas = { "Banco de Dados I", "Eletronica I", "Engenharia de Software II",
+			"Inteligencia Artificial", "Laboratorio de Redes de Computadores", "Programacao Paralela e Concorrente",
+			"Sistemas Distribuidos" };
+
+	private String currentSkillOrPref;
+	private final String habilidade = "Habilidade";
+	private final String preferencia = "Preferencia";
+
+	private String horaTurmaFixa;
+	private final String[] horas = { "13:00-13:50", "15:00-15:50", "17:00-17:50" };
+
+	private String diaTurmaFixa;
+	private final String[] diasAula = { "SEG-QUA", "TER-QUI", "QUA-SEX" };
+
+	private final String[] horarios = { "SEG_1300", "SEG_1350", "SEG_1500", "SEG_1550", "SEG_1700", "SEG_1750",
+			"TER_1300", "TER_1350", "TER_1500", "TER_1550", "TER_1700", "TER_1750", "QUA_1300", "QUA_1350", "QUA_1500",
+			"QUA_1550", "QUA_1700", "QUA_1750", "QUI_1300", "QUI_1350", "QUI_1500", "QUI_1550", "QUI_1700", "QUI_1750",
+			"SEX_1300", "SEX_1350", "SEX_1500", "SEX_1550", "SEX_1700", "SEX_1750" };
+
+	private JPanel painelPrincipal;
+	public static JFrame frame;
+	private JComboBox<String> cbProfessor;
+	private JTextArea jScrollTextArea;
+
+	List<JTextArea> resultTexts = new ArrayList<JTextArea>();
+
+	public ProfessorAndDisciplinas getDisciplinaPr(List<ProfessorAndDisciplinas> listDp, int index) {
+		for (ProfessorAndDisciplinas prefPr : listDp) {
+			if (prefPr.getProfessor() == index) {
+				return prefPr;
+			}
+		}
+		ProfessorAndDisciplinas pAp = new ProfessorAndDisciplinas(index, new ArrayList<Integer>());
+		listDp.add(pAp);
+		return pAp;
+	}
+
+	public boolean profTemDisc(List<ProfessorAndDisciplinas> listDp, int prof, int pref) {
+		if (listDp.size() == 0) {
+			return false;
+		}
+		for (int prefPr : listDp.get(prof).getDisciplinas()) {
+			if (prefPr == pref) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static void main(String[] args) {
+		frame = new PainelPrincipal();
+		frame.setVisible(true);
+	}
+
+	public String getProfessorAndDisciplina(ProfessorAndDisciplinas pAd, boolean isSkill) {
+
+		String result = professores.get(pAd.getProfessor());
+		if (isSkill)
+			result += " possui " + habilidade + "(s) em ";
+		else
+			result += " possui " + preferencia + "(s) em ";
+
+		for (int i = 0; i < pAd.getDisciplinas().size(); i++) {
+			if (i == 0)
+				result += disciplinas[pAd.getDisciplinas().get(i)];
+			else
+				result += ", " + disciplinas[pAd.getDisciplinas().get(i)];
+		}
+		return result;
+	}
+
+	private PainelPrincipal() {
+		for (int i = 0; i < professoresPadroes.length; i++) {
+			List<Integer> habs = new ArrayList<Integer>();
+			habs.add(professoresPadroes.length - 1 - i);
+			professores.add(professoresPadroes[i]);
+			preferenciasProfessores.add(new ProfessorAndDisciplinas(i, new ArrayList<Integer>()));
+			habilidadesProfessores.add(new ProfessorAndDisciplinas(i, habs));
+		}
+
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setTitle("Alocar Disciplinas");
+		setSize(1200, 720);
+		setMinimumSize(getSize());
+
+		createMenuBar();
+
+		// Painel principal
+		painelPrincipal = new JPanel();
+		painelPrincipal.setBorder(new EmptyBorder(5, 5, 5, 5));
+		painelPrincipal.setLayout(null);
+		painelPrincipal.setBackground(Color.lightGray);
+		setContentPane(painelPrincipal);
+
+		painelPrincipal.add(getPainelSelecao());
+		painelPrincipal.add(getPainelInicial());
+		painelPrincipal.add(getResultPainel());
+
+		validate();
+	}
+
+	public JPanel getPainelInicial() {
+		JPanel painelInicial = new JPanel();
+		painelInicial.setBounds(5, 75, 1175, 400);
+		painelInicial.setLayout(new BoxLayout(painelInicial, BoxLayout.Y_AXIS));
+
+		JLabel vazio = new JLabel("\n");
+		painelInicial.add(vazio);
+
+		JLabel labelInicial = new JLabel("Dados iniciais");
+		painelInicial.add(labelInicial);
+
+		vazio = new JLabel("\n");
+		painelInicial.add(vazio);
+
+		JLabel labelProfessores = new JLabel();
+		painelInicial.add(labelProfessores);
+
+		vazio = new JLabel("\n");
+		painelInicial.add(vazio);
+
+		JLabel labelDisciplinas = new JLabel();
+		painelInicial.add(labelDisciplinas);
+
+		vazio = new JLabel("\n");
+		painelInicial.add(vazio);
+
+		String professoresList = "Lista de professores: ";
+		for (ProfessorAndDisciplinas pAd : habilidadesProfessores) {
+
+			professoresList += professores.get(pAd.getProfessor()) + ", ";
+
+			JLabel labelPreferencia = new JLabel(getProfessorAndDisciplina(pAd, true));
+			painelInicial.add(labelPreferencia);
+		}
+
+		String disString = "Lista de disciplinas: ";
+		for (String d : disciplinas) {
+			disString += d + ", ";
+		}
+
+		labelDisciplinas.setText(disString.substring(0, disString.length() - 2) + "\n");
+
+		vazio = new JLabel("\n");
+		painelInicial.add(vazio);
+
+		labelProfessores.setText(professoresList.substring(0, professoresList.length() - 2) + "\n");
+
+		JLabel labelTurmaFixa = new JLabel(disciplinas[1] + " é uma turma fixa por ser de outro departamento");
+		painelInicial.add(labelTurmaFixa);
+
+		vazio = new JLabel("\n");
+		painelInicial.add(vazio);
+
+		jScrollTextArea = new JTextArea();
+		jScrollTextArea.setEditable(false);
+
+		JScrollPane scroll = new JScrollPane(jScrollTextArea);
+		painelInicial.add(scroll);
+		
+		return painelInicial;
+	}
+
+	public String getValueFormatted(String str) {
+		int start = str.indexOf("=");
+		return str.substring(start, str.length());
+	}
+
+	private JPanel getResultPainel() {
+		JPanel painelResult = new JPanel();
+		painelResult.setBounds(5, 485, 1175, 165);
+		painelResult.setLayout(new BoxLayout(painelResult, BoxLayout.X_AXIS));
+
+		for (int i = 0; i < disciplinas.length; i++) {
+			JLabel vazio = new JLabel("\n");
+			painelResult.add(vazio);
+
+			JTextArea jTextArea = new JTextArea();
+			jTextArea.setEditable(false);
+			resultTexts.add(jTextArea);
+			painelResult.add(jTextArea);
+		}
+		
+		return painelResult;
+	}
+
+	private void createMenuBar() {
+		// Barra de menu
+		JMenuBar menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+
+		JMenu menu = new JMenu("Menu");
+		menuBar.add(menu);
+
+		// Botao para fechar app
+		JMenuItem sair = new JMenuItem("Sair");
+		sair.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent ae) {
+				System.exit(0);
+			}
+		});
+		menu.add(sair);
+	}
+
+	public JPanel getPainelSelecao() {
+		JPanel painelSelecao = new JPanel();
+		painelSelecao.setBounds(5, 5, 1175, 35);
+
+		/*
+		 * Preferencias professor
+		 */
+		// ComboBox para selecionar professor
+		cbProfessor = new JComboBox<String>(professoresPadroes);
+		cbProfessor.setEditable(true);
+		currentProfessor = professoresPadroes[0];
+
+		cbProfessor.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				currentProfessor = (String) cbProfessor.getSelectedItem();
+			}
+		});
+		painelSelecao.add(cbProfessor);
+
+		// Label de preferencia do professor
+		JLabel labelPreferencia = new JLabel("tem ");
+		painelSelecao.add(labelPreferencia);
+
+		// ComboBox para selecionar habilidade ou preferencia
+		JComboBox<String> cbSkillPref = new JComboBox<String>();
+		cbSkillPref.addItem(habilidade);
+		cbSkillPref.addItem(preferencia);
+		currentSkillOrPref = habilidade;
+
+		cbSkillPref.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				currentSkillOrPref = (String) cbSkillPref.getSelectedItem();
+			}
+		});
+
+		painelSelecao.add(cbSkillPref);
+
+		// Label de referencia à disciplina
+		JLabel labelConectivo = new JLabel("em ");
+		painelSelecao.add(labelConectivo);
+
+		// ComboBox para selecionar disciplina
+		JComboBox<String> cbDisciplina = new JComboBox<String>(disciplinas);
+		currentDisciplina = disciplinas[0];
+
+		cbDisciplina.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				currentDisciplina = (String) cbDisciplina.getSelectedItem();
+			}
+		});
+
+		painelSelecao.add(cbDisciplina);
+
+		// Botao adicionar preferencias e/ou professor
+		JButton botaoAdd = new JButton();
+		botaoAdd.setText("Adicionar");
+		botaoAdd.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				addDisciplina();
+			}
+		});
+		painelSelecao.add(botaoAdd, BorderLayout.LINE_END);
+
+		/*
+		 * Turma fixa
+		 */
+		JLabel labelTurmaFixa = new JLabel("Turma Fixa: ");
+		painelSelecao.add(labelTurmaFixa);
+
+		// ComboBox para selecionar dia
+		JComboBox<String> cbDia = new JComboBox<String>(diasAula);
+		diaTurmaFixa = diasAula[0];
+		cbDia.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				diaTurmaFixa = (String) cbDia.getSelectedItem();
+			}
+		});
+		painelSelecao.add(cbDia);
+
+		// ComboBox para selecionar hora
+		JComboBox<String> cbHora = new JComboBox<String>(horas);
+		horaTurmaFixa = horas[0];
+
+		cbHora.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				horaTurmaFixa = (String) cbHora.getSelectedItem();
+			}
+		});
+		painelSelecao.add(cbHora);
+
+		// Add botao iniciar
+		JButton bttnInicar = new JButton();
+		bttnInicar.setText("Iniciar");
+		bttnInicar.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				start();
+			}
+		});
+		painelSelecao.add(bttnInicar, BorderLayout.LINE_END);
+
+		return painelSelecao;
+	}
+
+	protected void addDisciplina() {
+		if (currentSkillOrPref.equals(habilidade))
+			addDisciplina(true, habilidadesProfessores);
+		else
+			addDisciplina(false, preferenciasProfessores);
+
+	}
+
+	protected void addDisciplina(boolean isSkill, List<ProfessorAndDisciplinas> listaD) {
+		String msg = "";
+		for (int i = 0; i < disciplinas.length; i++) {
+			if (disciplinas[i].equals(currentDisciplina)) {
+				int indexProfessor = professores.indexOf(currentProfessor);
+				if (indexProfessor == -1) {
+					List<Integer> preferenciasProfessor = new ArrayList<Integer>();
+					List<Integer> habilidadesProfessor = new ArrayList<Integer>();
+
+					if (isSkill)
+						habilidadesProfessor.add(i);
+					else
+						preferenciasProfessor.add(i);
+
+					professores.add(currentProfessor);
+
+					int newProfIndex = professores.size() - 1;
+
+					habilidadesProfessores.add(new ProfessorAndDisciplinas(newProfIndex, habilidadesProfessor));
+					preferenciasProfessores.add(new ProfessorAndDisciplinas(newProfIndex, preferenciasProfessor));
+					msg = currentProfessor + " adicionado(a) a professores e " + currentDisciplina
+							+ " foi adicionada as suas " + currentSkillOrPref + "s";
+				} else {
+					if (!profTemDisc(listaD, indexProfessor, i)) {
+						ProfessorAndDisciplinas prAndDisciplinas = getDisciplinaPr(listaD, indexProfessor);
+						if (prAndDisciplinas.getDisciplinas().size() < 3) {
+							prAndDisciplinas.getDisciplinas().add(i);
+							if (isSkill)
+								habilidadesProfessores.set(indexProfessor, prAndDisciplinas);
+							else
+								preferenciasProfessores.set(indexProfessor, prAndDisciplinas);
+							msg = currentDisciplina + " adicionada(a) as " + currentSkillOrPref + "s de "
+									+ currentProfessor;
+						} else
+							msg = currentProfessor + " antigiu o maximo de " + currentSkillOrPref + "s";
+					} else
+						msg = currentProfessor + " ja possui " + currentSkillOrPref + " em " + currentDisciplina;
+				}
+				jScrollTextArea.setText(jScrollTextArea.getText() + "   " + msg + "\n");
+				System.out.println(msg);
+				break;
+			}
+		}
+	}
+
+	public void start() {
+		// 0x0 => 0, 1, 12, 13 // 0x1 => 6, 7, 18, 19 // 0x2 => 12, 13, 24, 25
+		// 1x0 => 2, 3, 14, 15 // 1x1 => 8, 9, 20, 21 // 1x2 => 14, 15, 26, 27
+		// 2x0 => 4, 5, 16, 17 // 2x1 => 10, 11, 22, 23 // 2x2 => 16, 17, 28, 29
+		System.out.println("\nProfessores => " + professores + "\n");
+
+		int first = 0;
+		for (int i = 0; i < horas.length; i++) {
+			if (horas[i].contains(horaTurmaFixa)) {
+				for (int j = 0; j < diasAula.length; j++) {
+					if (diasAula[j].contains(diaTurmaFixa)) {
+						first = (2 * i) + (j * 6);
+						System.out.println("Horarios turma fixa => " + horarios[first] + ", " + horarios[first + 1]
+								+ ", " + horarios[first + 12] + ", " + horarios[first + 13] + "\n");
+						break;
+					}
+				}
+				break;
+			}
+		}
+
+		double inicio = System.currentTimeMillis();
+		FlexibleBacktrackingSolver<Variable, String> fBSolver = new FlexibleBacktrackingSolver<>();
+
+		AlocaTurma alocaTurma = new AlocaTurma(professores, preferenciasProfessores, habilidadesProfessores,
+				horarios[first], horarios[first + 1], horarios[first + 12], horarios[first + 13]);
+		Optional<Assignment<Variable, String>> solucao = fBSolver.solve(alocaTurma);
+
+		if (solucao.isPresent()) {
+			String sol = solucao.get().toString().replace(", P", ":\n\nP").replace(", D", "\n\nD").replace(", ", "\n");
+			String[] sov = solucao.get().toString().substring(1, sol.length() - 1).split(", ");
+			String formatted = "";
+			List<String> newSol = new ArrayList<String>();
+
+			for (String string : sov) {
+				switch (string.charAt(0)) {
+				case 'D':
+					if (formatted != "") {
+						newSol.add(formatted.substring(0, formatted.length() - 1));
+						formatted = "";
+					}
+					formatted += string.substring(3) + "\n";
+					break;
+				case 'P':
+					formatted += string.substring(5) + "\n";
+					break;
+				case 'H':
+					formatted += string.substring(6) + "\n";
+					break;
+				default:
+					break;
+				}
+			}
+
+			for (int i = 0; i < newSol.size(); i++) {
+				resultTexts.get(i).setText(newSol.get(i) + "\n");
+			}
+			System.out.println(sol.substring(1, sol.length() - 1));
+		}
+
+		double fim = System.currentTimeMillis();
+		System.out.println("\nTempo: " + (fim - inicio));
+	}
+}
