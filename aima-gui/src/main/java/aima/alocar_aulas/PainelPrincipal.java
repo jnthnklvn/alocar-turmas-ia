@@ -4,47 +4,49 @@ package aima.alocar_aulas;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import aima.alocar_aulas.database.Conn;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import aima.core.util.datastructure.XYLocation;
+
 public class PainelPrincipal extends JFrame {
 	private static final long serialVersionUID = 1L;
 
+	private String currentProfessor;
+	private List<String> professores = new ArrayList<String>();
+	private final String[] professoresPadroes = { "Walter", "Elena", "Evelyn", "Mia", "Robert" };
 
+	private List<XYLocation> preferenciasProfessores = new ArrayList<XYLocation>();
 
-	String currentProfessor;
-	String[] professores = { "Walter", "Elena", "Evelyn", "Mia", "Robert" };
+	private String currentDisciplina;
+	private final String[] disciplinas = { "Banco de Dados I", "Eletronica I", "Engenharia de Software II",
+			"Inteligencia Artificial", "Laboratorio de Redes de Computadores", "Programacao Paralela e Concorrente",
+			"Sistemas Distribuidos" };
 
-	String currentDisciplina;
-	String[] disciplinas = { "Banco de Dados I", "Eletronica I", "Engenharia de Software II", "Inteligencia Artificial",
-			"Laboratorio de Redes de Computadores", "Programacao Paralela e Concorrente", "Sistemas Distribuidos" };
+	private String horaTurmaFixa;
+	private final String[] horas = { "13:00-13:50", "15:00-15:50", "17:00-17:50" };
 
-	String currentHora;
-	String[] horas = { "13:00-13:50", "15:00-15:50", "17:00-17:50" };
+	private String diaTurmaFixa;
+	private final String[] diasAula = { "SEG-QUA", "TER-QUI", "QUA-SEX" };
 
-	String currentDia;
-	String[] selectDias = { "SEG-QUA", "TER-QUI", "QUA-SEX" };
-	String[] dias = { "SEG", "TER", "QUA", "QUI", "SEX" };
+	private final String[] horarios = { "SEG_1300", "SEG_1350", "SEG_1500", "SEG_1550", "SEG_1700", "SEG_1750",
+			"TER_1300", "TER_1350", "TER_1500", "TER_1550", "TER_1700", "TER_1750", "QUA_1300", "QUA_1350", "QUA_1500",
+			"QUA_1550", "QUA_1700", "QUA_1750", "QUI_1300", "QUI_1350", "QUI_1500", "QUI_1550", "QUI_1700", "QUI_1750",
+			"SEX_1300", "SEX_1350", "SEX_1500", "SEX_1550", "SEX_1700", "SEX_1750" };
 
-	String currentHorario;
-	String[] horarios = { "SEG_1300", "SEG_1350", "SEG_1500", "SEG_1550", "SEG_1700", "SEG_1750", "TER_1300",
-			"TER_1350", "TER_1500", "TER_1550", "TER_1700", "TER_1750", "QUA_1300", "QUA_1350", "QUA_1500", "QUA_1550",
-			"QUA_1700", "QUA_1750", "QUI_1300", "QUI_1350", "QUI_1500", "QUI_1550", "QUI_1700", "QUI_1750", "SEX_1300",
-			"SEX_1350", "SEX_1500", "SEX_1550", "SEX_1700", "SEX_1750" };
-
-	private JPanel contentPane;
+	private JPanel painelPrincipal;
 	public static JFrame frame;
 
 	public static void main(String[] args) {
@@ -52,20 +54,39 @@ public class PainelPrincipal extends JFrame {
 		frame.setVisible(true);
 	}
 
-	public PainelPrincipal() {
+	private PainelPrincipal() {
+		for (String professor : professoresPadroes) {
+			professores.add(professor);
+		}
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setTitle("Alocar Disciplinas");
 		setSize(1000, 600);
 		setMinimumSize(getSize());
 
-		// Create Menu bar
+		createMenuBar();
+
+		// Painel principal
+		painelPrincipal = new JPanel();
+		painelPrincipal.setBorder(new EmptyBorder(5, 5, 5, 5));
+		painelPrincipal.setLayout(null);
+		painelPrincipal.setBackground(Color.white);
+		setContentPane(painelPrincipal);
+
+		painelPrincipal.add(getPainelSelecao());
+
+		validate();
+	}
+
+	private void createMenuBar() {
+		// Barra de menu
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 
 		JMenu menu = new JMenu("Menu");
 		menuBar.add(menu);
 
-		// Menu exit this application
+		// Botao para fechar app
 		JMenuItem sair = new JMenuItem("Sair");
 		sair.addActionListener(new ActionListener() {
 			@Override
@@ -74,35 +95,20 @@ public class PainelPrincipal extends JFrame {
 			}
 		});
 		menu.add(sair);
+	}
 
-		// Panel main (painting on this panel)
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		contentPane.setLayout(new BorderLayout(0, 0));
-		contentPane.setBackground(Color.white);
-		setContentPane(contentPane);
+	public JPanel getPainelSelecao() {
+		JPanel painelSelecao = new JPanel();
+		painelSelecao.setBounds(5, 5, 975, 35);
+		painelSelecao.setBackground(Color.LIGHT_GRAY);
 
-		JPanel panel = new JPanel();
-		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
-		flowLayout.setAlignment(FlowLayout.LEFT);
-		panel.setBackground(Color.LIGHT_GRAY);
-		contentPane.add(panel);
-
-		JPanel panel1 = new JPanel();
-		FlowLayout flowLayout1 = (FlowLayout) panel1.getLayout();
-		flowLayout1.setAlignment(FlowLayout.LEFT);
-		panel1.setBackground(Color.LIGHT_GRAY);
-		panel.setBounds(0, 5, 750, 70);
-		contentPane.add(panel1);
-
+		/*
+		 * Preferencias professor
+		 */
 		// ComboBox para selecionar professor
-		JComboBox<String> cbProfessor = new JComboBox<String>(professores);
-		currentProfessor = professores[0];
-		
-		// ComboBox para selecionar professor
-		JComboBox<String> cbProfessor1 = new JComboBox<String>(professores);
-		currentProfessor = professores[0];
-		panel1.add(cbProfessor1);
+		JComboBox<String> cbProfessor = new JComboBox<String>(professoresPadroes);
+		cbProfessor.setEditable(true);
+		currentProfessor = professoresPadroes[0];
 
 		cbProfessor.addActionListener(new ActionListener() {
 			@Override
@@ -110,57 +116,64 @@ public class PainelPrincipal extends JFrame {
 				currentProfessor = (String) cbProfessor.getSelectedItem();
 			}
 		});
-		panel.add(cbProfessor);
+		painelSelecao.add(cbProfessor);
 
 		// Label de preferencia do professor
 		JLabel labelPreferencia = new JLabel("prefere");
-		panel.add(labelPreferencia);
+		painelSelecao.add(labelPreferencia);
 
 		// ComboBox para selecionar disciplina
-		JList<String> cbDisciplina = new JList<String>(disciplinas);
+		JComboBox<String> cbDisciplina = new JComboBox<String>(disciplinas);
 		currentDisciplina = disciplinas[0];
 
-		
-		panel.add(cbDisciplina);
+		cbDisciplina.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				currentDisciplina = (String) cbDisciplina.getSelectedItem();
+			}
+		});
 
-		// ComboBox para selecionar horario
-		// JComboBox<String> cbHorario = new JComboBox<String>(horarios);
-		// currentHorario = horarios[0];
-		//
-		// cbHorario.addActionListener(new ActionListener() {
-		// @Override
-		// public void actionPerformed(ActionEvent arg0) {
-		// currentHorario = (String) cbHorario.getSelectedItem();
-		// }
-		// });
-		// panel.add(cbHorario);
+		painelSelecao.add(cbDisciplina);
 
-		// Label de turma fixa
+		// Botao adicionar preferencias e/ou professor
+		JButton botaoAdd = new JButton();
+		botaoAdd.setText("Adicionar");
+		botaoAdd.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				add();
+			}
+		});
+		painelSelecao.add(botaoAdd, BorderLayout.LINE_END);
+
+		/*
+		 * Turma fixa
+		 */
 		JLabel labelTurmaFixa = new JLabel("        Turma Fixa: ");
-		panel.add(labelTurmaFixa);
+		painelSelecao.add(labelTurmaFixa);
 
 		// ComboBox para selecionar dia
-		JComboBox<String> cbDia = new JComboBox<String>(selectDias);
-		currentDia = selectDias[0];
+		JComboBox<String> cbDia = new JComboBox<String>(diasAula);
+		diaTurmaFixa = diasAula[0];
 		cbDia.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				currentDia = (String) cbDia.getSelectedItem();
+				diaTurmaFixa = (String) cbDia.getSelectedItem();
 			}
 		});
-		panel.add(cbDia);
+		painelSelecao.add(cbDia);
 
 		// ComboBox para selecionar hora
 		JComboBox<String> cbHora = new JComboBox<String>(horas);
-		currentHora = horas[0];
+		horaTurmaFixa = horas[0];
 
 		cbHora.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				currentHora = (String) cbHora.getSelectedItem();
+				horaTurmaFixa = (String) cbHora.getSelectedItem();
 			}
 		});
-		panel.add(cbHora);
+		painelSelecao.add(cbHora);
 
 		// Add botao iniciar
 		JButton bttnInicar = new JButton();
@@ -171,11 +184,43 @@ public class PainelPrincipal extends JFrame {
 				start();
 			}
 		});
-		panel.add(bttnInicar, BorderLayout.LINE_END);
+		painelSelecao.add(bttnInicar, BorderLayout.LINE_END);
 
-		// Create new Component paint to paint with mouse
-		contentPane.add(new PainelDesenho(), BorderLayout.CENTER);
-		validate();
+		return painelSelecao;
+	}
+
+	protected void add() {
+		for (int i = 0; i < disciplinas.length; i++) {
+			if (disciplinas[i].equals(currentDisciplina)) {
+				int indexProfessor = professores.indexOf(currentProfessor);
+				if (indexProfessor == -1) {
+					professores.add(currentProfessor);
+					preferenciasProfessores.add(new XYLocation(professores.size() - 1, i));
+					System.out.println(currentProfessor + " adicionado(a) e " + currentDisciplina
+							+ " adicionada as suas preferencias");
+				} else {
+					XYLocation xyLocation = new XYLocation(indexProfessor, i);
+					if (preferenciasProfessores.indexOf(xyLocation) == -1) {
+						int countPrefsProfessor = 0;
+						for (int j = 0; j < preferenciasProfessores.size(); j++) {
+							if (preferenciasProfessores.get(j).getX() == indexProfessor) {
+								countPrefsProfessor += 1;
+							}
+						}
+						if (countPrefsProfessor < 3) {
+							preferenciasProfessores.add(xyLocation);
+							System.out.println(
+									currentDisciplina + " adicionada(a) as preferencias de " + currentProfessor);
+						} else
+							System.out.println(currentProfessor + " antigiu o maximo de preferencias");
+					} else
+						System.out.println(currentProfessor + " ja prefere " + currentDisciplina);
+				}
+				break;
+			}
+		}
+		System.out.println(preferenciasProfessores);
+		System.out.println(professores + "\n");
 	}
 
 	public void start() {
@@ -183,14 +228,13 @@ public class PainelPrincipal extends JFrame {
 		// 1x0 => 2, 3, 14, 15 // 1x1 => 8, 9, 20, 21 // 1x2 => 14, 15, 26, 27
 		// 2x0 => 4, 5, 16, 17 // 2x1 => 10, 11, 22, 23 // 2x2 => 16, 17, 28, 29
 
-		System.out.println(currentProfessor);
-		System.out.println(currentDisciplina + "\n");
-
+		System.out.println(preferenciasProfessores);
+		System.out.println(professores + "\n");
 		int first;
 		for (int i = 0; i < horas.length; i++) {
-			if (horas[i].contains(currentHora)) {
-				for (int j = 0; j < selectDias.length; j++) {
-					if (selectDias[j].contains(currentDia)) {
+			if (horas[i].contains(horaTurmaFixa)) {
+				for (int j = 0; j < diasAula.length; j++) {
+					if (diasAula[j].contains(diaTurmaFixa)) {
 						first = (2 * i) + (j * 6);
 						System.out.println(horarios[first]);
 						System.out.println(horarios[first + 1]);
