@@ -122,7 +122,7 @@ public class PainelPrincipal extends JFrame {
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setTitle("Alocar Disciplinas");
-		setSize(1500, 720);
+		setSize(1700, 720);
 		setMinimumSize(getSize());
 		setMaximumSize(getSize());
 
@@ -145,7 +145,7 @@ public class PainelPrincipal extends JFrame {
 
 	public JPanel getPainelInicial() {
 		JPanel painelInicial = new JPanel();
-		painelInicial.setBounds(5, 75, 1400, 400);
+		painelInicial.setBounds(5, 75, 1700, 400);
 		painelInicial.setLayout(new BoxLayout(painelInicial, BoxLayout.Y_AXIS));
 
 		JLabel vazio = new JLabel("\n");
@@ -212,7 +212,7 @@ public class PainelPrincipal extends JFrame {
 
 	private JPanel getResultPainel() {
 		JPanel painelResult = new JPanel();
-		painelResult.setBounds(5, 485, 1175, 165);
+		painelResult.setBounds(5, 485, 1700, 165);
 		painelResult.setLayout(new BoxLayout(painelResult, BoxLayout.X_AXIS));
 
 		for (int i = 0; i < disciplinas.length; i++) {
@@ -278,9 +278,11 @@ public class PainelPrincipal extends JFrame {
 			}
 			conexao.disconnect();
 		});
-		painelSelecao.setBounds(5, 5, 1500, 35);
+		painelSelecao.setBounds(5, 5, 1600, 35);
 
-
+		if (professores_query.size() > 0) {
+			currentProfessor = professores_query.get(0);
+		}
 
 		cbProfessor.addActionListener(new ActionListener() {
 			@Override
@@ -351,7 +353,8 @@ public class PainelPrincipal extends JFrame {
 		botaoAdd.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				addDisciplina();
+				if (currentProfessor != null) {
+				addDisciplina();}
 			}
 		});
 		painelSelecao.add(botaoAdd, BorderLayout.LINE_END);

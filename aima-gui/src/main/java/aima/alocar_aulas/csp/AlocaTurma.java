@@ -3,7 +3,7 @@ package aima.alocar_aulas.csp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import aima.alocar_aulas.database.Conn;
+
 import aima.alocar_aulas.constraint.AllDifferentConstraint;
 import aima.alocar_aulas.constraint.HorarioDiasDiferentesConstraint;
 import aima.alocar_aulas.constraint.HorarioDiasIguasConstraint;
@@ -52,8 +52,8 @@ public class AlocaTurma extends CSP<Variable, String> {
 	HashMap<String, Integer[]> habilidades = new HashMap<String, Integer[]>();
 
 	public AlocaTurma(List<String> newProfessores, List<ProfessorAndDisciplinas> newPreferencias,
-			List<ProfessorAndDisciplinas> newHabilidades, String hTFixa1, String hTFixa2, String hTFixa3,
-			String hTFixa4) {
+					  List<ProfessorAndDisciplinas> newHabilidades, String hTFixa1, String hTFixa2, String hTFixa3,
+					  String hTFixa4) {
 		String[] professores = newProfessores.toArray(new String[0]);
 
 		double inicio = System.currentTimeMillis();
@@ -191,6 +191,6 @@ public class AlocaTurma extends CSP<Variable, String> {
 				addConstraint(new HorarioDiasDiferentesConstraint(horario1, horario2, dias));
 			}
 		}
-		System.out.println("Tempo de formula��o: " + (System.currentTimeMillis() - inicio) + "\n");
+		System.out.println("Tempo de formulação: " + (System.currentTimeMillis() - inicio) + "\n");
 	}
 }
