@@ -23,7 +23,7 @@ import aima.core.search.csp.Variable;
 
 public class PainelPrincipal extends JFrame {
 	private static final long serialVersionUID = 1L;
-	Conn conexao = new Conn("PostgreSql","localhost","5432","alocar_aulas","postgres","Qmasbsi45.");
+	Conn conexao = new Conn("PostgreSql","localhost","5432","nome_banco","usuario","senha");
 	private String currentProfessor;
 	private List<String> professores = new ArrayList<String>();
 	private final String[] professoresPadroes = { "Walter", "Elena", "Evelyn", "Steve", "Mia", "Robert", "Lana" };
@@ -239,7 +239,7 @@ public class PainelPrincipal extends JFrame {
 
 		labelProfessores.setText(professoresList.substring(0, professoresList.length() - 2) + "\n");
 
-		JLabel labelTurmaFixa = new JLabel(disciplinas[1] + " é uma turma fixa por ser de outro departamento");
+		JLabel labelTurmaFixa = new JLabel(disciplinas[1] + " Ã© uma turma fixa por ser de outro departamento");
 		painelInicial.add(labelTurmaFixa);
 
 		vazio = new JLabel("\n");
@@ -378,7 +378,7 @@ public class PainelPrincipal extends JFrame {
 
 		painelSelecao.add(cbSkillPref);
 
-		// Label de referencia à disciplina
+		// Label de referencia Ã  disciplina
 		JLabel labelConectivo = new JLabel("em ");
 		painelSelecao.add(labelConectivo);
 
