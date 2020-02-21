@@ -9,7 +9,7 @@ create table Habilidades (
                              professor_id BIGINT NOT NULL,
                              CONSTRAINT professor_fkey FOREIGN KEY (professor_id)
                                  REFERENCES Professor (id) MATCH SIMPLE
-                                 ON UPDATE NO ACTION ON DELETE NO ACTION
+                                 ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
 create table Preferencias (
@@ -18,7 +18,7 @@ create table Preferencias (
                               professor_id BIGINT NOT NULL,
                               CONSTRAINT professor_fkey FOREIGN KEY (professor_id)
                                   REFERENCES Professor (id) MATCH SIMPLE
-                                  ON UPDATE NO ACTION ON DELETE NO ACTION
+                                  ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
 
@@ -35,13 +35,15 @@ insert into habilidades (disciplina,professor_id)  values ('Eletronica I',1);
 insert into habilidades (disciplina,professor_id)  values ('Engenharia de Software II',1);
 insert into habilidades (disciplina,professor_id)  values ('Inteligencia Artificial',2);
 insert into habilidades (disciplina,professor_id)  values ('Laboratorio de Redes de Computadores',2);
-insert into habilidades (disciplina,professor_id)  values ('Sistemas Distribuidos',2);
+insert into habilidades (disciplina,professor_id)  values ('Programacao Paralela e Concorrente",
+			"Sistemas Distribuidos',2);
 insert into habilidades (disciplina,professor_id)  values ('Banco de Dados I',3);
 insert into habilidades (disciplina,professor_id)  values ('Eletronica I',3);
 insert into habilidades (disciplina,professor_id)  values ('Engenharia de Software II',3);
 insert into habilidades (disciplina,professor_id)  values ('Inteligencia Artificial',4);
 insert into habilidades (disciplina,professor_id)  values ('Laboratorio de Redes de Computadores',4);
-insert into habilidades (disciplina,professor_id)  values ('Programacao Paralela e Concorrente',4);
+insert into habilidades (disciplina,professor_id)  values ('Programacao Paralela e Concorrente",
+			"Sistemas Distribuidos',4);
 insert into habilidades (disciplina,professor_id)  values ('Banco de Dados I',5);
 insert into habilidades (disciplina,professor_id)  values ('Eletronica I',5);
-insert into habilidades (disciplina,professor_id)  values ('Sistemas Distribuidos',5);
+insert into habilidades (disciplina,professor_id)  values ('Engenharia de Software II',5);
