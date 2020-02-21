@@ -5,7 +5,7 @@ Mostrar horários de alocação de docentes a disciplinas (turmas) considerando 
 de “problemas de satisfação de restrições”.
 
 ## Contexto
-Você foi contatado para elaborar os horarios de uma Instituição de Ensino Superior onde
+Você foi contratado para elaborar os horários de uma Instituição de Ensino Superior onde
 deve mostrar a alocação de docentes às disciplinas. Portanto você deve considerar, segundo a resolução
 do curso, somente as discplinas obrigatórias do curso. Observar que algumas disciplinas podem ser de
 outros departamentos e dificilmente mudam de alocação de dia e horário (portanto podem ser
@@ -23,7 +23,7 @@ O código AIMA, Java, Elaborar um FrontEnd [ i) coleta de dados, ii) mostrar o
 horario ou horarios resposta e iii)uma lista de docentes e sua carga horária], Elaborar o BackEnd em
 função dos algoritmos do Cap de “problema de satisfação de restrições”
 
-## Armzenamento de dados secundários
+## Armazenamento de dados secundários
 O armazenamento dos dados secundários (em disco) pode ser
 utilizado arquivos formato texto ou formato xml( onde você deve acrecentar os tags) ou utilizar banco
 de dados. Pode utilizar dentro de estas opções o que lhe for mais conveniente para um desenvolvimento
@@ -44,7 +44,7 @@ elaboração do projeto final.
 
 Todos os integrantes devem estar aptos a responder perguntar específicamente dos algoritmos de
 “problemas de satisfação de restrições” , não sendo justifictiva o fato de ter feito ou participado
-somente por exemplo da interfáce gráfica, já que a nossa disciplina é de Inteligência Artificial.
+somente por exemplo da interface gráfica, já que a nossa disciplina é de Inteligência Artificial.
 O que não faz parte do trabalho: Voce não precisa se preocupar sobre a matrícula do discente,
 reserva de vagas. Tudo isso é resolvido pelo Sistema Acadêmico do DAA, você deve considerar que
 tem alunos matriculados na turma, portanto tem turma cheia. Voce não deve se preocupar na alocação
@@ -52,9 +52,9 @@ de número de Sala, isso também é feito pelo Sistema Acadêmico do DAA e não 
 trabalho final.
 
 ## Sobre as Restrições
-Foi indicado em sala de aula a restrição base de prefrencia pessoal dos
+Foi indicado em sala de aula a restrição base de preferência pessoal dos
 professores (de 3 a 5 disciplinas de preferência) para ministrar disciplinas. Sobre outras restrições
-diferentes fica em aberto a quantidade de restrições a serem adicionadas. Algumas foram comentadas
+diferentes, fica em aberto a quantidade de restrições a serem adicionadas. Algumas foram comentadas
 em sala de aula e dependerá do grupo avaliar quais considerar.
 
 É necessário elaborar um frontend para registrar as restrições e poder acrescentar ou remover as
@@ -69,12 +69,12 @@ Pode acontecer de uma disciplina não ter docente no final do algoritmo então n
 mostrar abaixo do nome da disciplina(turma) o texto “* Sem Docente” para que o Chefe de
 Departamento veja essa situação específica.
 
-Não olvidar de mostrar uam interface gráfica final a “iii) lista de docentes e sua carga horária”.
+Não olvidar de mostrar uma interface gráfica final a “iii) lista de docentes e sua carga horária”.
 
 ## Forma de Avaliação
 
 Na avaliação será considerado o Relatório Detalhado + Código Fonte (incluindo pequeno manual de
-funcionamento). Ver tópico “Relatório Detalhado” acima para maiores informações assi como cada um
+funcionamento). Ver tópico “Relatório Detalhado” acima para maiores informações assim como cada um
 dos tópicos aqui relatados.
 
 Para avaliação do trabalho final o sistema precisa estar funcional.
