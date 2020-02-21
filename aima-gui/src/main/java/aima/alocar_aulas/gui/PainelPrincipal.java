@@ -1,6 +1,8 @@
 package aima.alocar_aulas.gui;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.PreparedStatement;
@@ -9,13 +11,23 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 
 import aima.alocar_aulas.csp.AlocaTurma;
-import aima.alocar_aulas.database.Conn;
+import aima.alocar_aulas.database.SQLiteJDBCDriverConnection;
 import aima.alocar_aulas.model.ProfessorAndDisciplinas;
 import aima.core.search.csp.Assignment;
 import aima.core.search.csp.FlexibleBacktrackingSolver;
@@ -23,10 +35,10 @@ import aima.core.search.csp.Variable;
 
 public class PainelPrincipal extends JFrame {
 	private static final long serialVersionUID = 1L;
-	Conn conexao = new Conn("PostgreSql","localhost","5432","nome_banco","usuario","senha");
+	//Conn conexao = new Conn("PostgreSql","localhost","5432","nome_banco","usuario","senha");
+	SQLiteJDBCDriverConnection conexao = new SQLiteJDBCDriverConnection();
 	private String currentProfessor;
 	private List<String> professores = new ArrayList<String>();
-	private final String[] professoresPadroes = { "Walter", "Elena", "Evelyn", "Steve", "Mia", "Robert", "Lana" };
 	private List<String> professores_query = new ArrayList<String>();
 	private List<Integer> professores_query_id = new ArrayList<Integer>();
 	private List<ProfessorAndDisciplinas> preferenciasProfessores = new ArrayList<ProfessorAndDisciplinas>();
@@ -142,8 +154,8 @@ public class PainelPrincipal extends JFrame {
 					"where professor.nome = '" + professores_query.get(i) + "'";
 			ResultSet result2 = conexao.query(query);
 
-			ArrayList habilidades_professores = new ArrayList<Integer>();
-			ArrayList preferencias_professores = new ArrayList<Integer>();
+			ArrayList<Integer> habilidades_professores = new ArrayList<Integer>();
+			ArrayList<Integer> preferencias_professores = new ArrayList<Integer>();
 			while (result2.next()) {
 				if (result2.getString(1) != null ){
 					for (int j = 0; j < disciplinas.length; j++) {
