@@ -40,7 +40,7 @@ public class PainelPrincipal extends JFrame {
 	private String currentSkillOrPref;
 	private final String habilidade = "Habilidade";
 	private final String preferencia = "Preferencia";
-
+	private ResultSet professoresQueryResult;
 	private String horaTurmaFixa;
 	private final String[] horas = { "13:00-13:50", "15:00-15:50", "17:00-17:50" };
 
@@ -90,16 +90,18 @@ public class PainelPrincipal extends JFrame {
 	public String getProfessorAndDisciplina(ProfessorAndDisciplinas pAd, boolean isSkill) {
 
 		String result = professores.get(pAd.getProfessor());
+
 		if (isSkill)
 			result += " possui " + habilidade + "(s) em ";
 		else
 			result += " possui " + preferencia + "(s) em ";
-
+		System.out.println(result);
 		for (int i = 0; i < pAd.getDisciplinas().size(); i++) {
 			if (i == 0)
 				result += disciplinas[pAd.getDisciplinas().get(i)];
 			else
 				result += ", " + disciplinas[pAd.getDisciplinas().get(i)];
+			System.out.println(result);
 		}
 		return result;
 	}
@@ -107,20 +109,44 @@ public class PainelPrincipal extends JFrame {
 	private PainelPrincipal() throws SQLException {
 		conexao.connect();
 
-		ResultSet result = conexao.query("Select nome from professor");
-		while (result.next()) {
-			professores_query.add(result.getString(1));
+		professoresQueryResult = conexao.query("Select id, nome from professor");
+		while (professoresQueryResult.next()) {
+			professores_query.add(professoresQueryResult.getString(2));
 		}
-
-
 
 		for (int i = 0; i < professores_query.size(); i++) {
 			List<Integer> habs = new ArrayList<Integer>();
 			habs.add(professores_query.size() - 1 - i);
 			professores.add(professores_query.get(i));
-			preferenciasProfessores.add(new ProfessorAndDisciplinas(i, new ArrayList<Integer>()));
-			System.out.println(habs);
-			habilidadesProfessores.add(new ProfessorAndDisciplinas(i, habs));
+			String query = "" +
+					"select habilidades.disciplina as disciplina_habilidade, " +
+					"preferencias.disciplina as disciplina_preferencia\n" +
+					"from professor \n" +
+					"\tleft join habilidades on habilidades.professor_id = professor.id  \n" +
+					"\tleft join preferencias on preferencias.professor_id = professor.id \n" +
+					"where professor.nome = '" + professores_query.get(i) + "'";
+			ResultSet result2 = conexao.query(query);
+
+			ArrayList habilidades_professores = new ArrayList<Integer>();
+			ArrayList preferencias_professores = new ArrayList<Integer>();
+			while (result2.next()) {
+				if (result2.getString(1) != null ){
+					for (int j = 0; j < disciplinas.length; j++) {
+						if (result2.getString(1).equals(disciplinas[j])){
+							habilidades_professores.add(j);
+						}
+					}
+				}
+				else if (result2.getString(2) != null) {
+					for (int j = 0; j < disciplinas.length; j++) {
+					if (result2.getString(2).equals(disciplinas[j])){
+						preferencias_professores.add(j);
+					}}
+				}
+			}
+
+			preferenciasProfessores.add(new ProfessorAndDisciplinas(i,preferencias_professores ));
+			habilidadesProfessores.add(new ProfessorAndDisciplinas(i, habilidades_professores));
 		}
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -176,7 +202,7 @@ public class PainelPrincipal extends JFrame {
 		for (ProfessorAndDisciplinas pAd : habilidadesProfessores) {
 
 			professoresList += professores.get(pAd.getProfessor()) + ", ";
-
+			System.out.println(pAd.getDisciplinas());
 			JLabel labelPreferencia = new JLabel(getProfessorAndDisciplina(pAd, true));
 			painelInicial.add(labelPreferencia);
 		}
@@ -264,8 +290,8 @@ public class PainelPrincipal extends JFrame {
 		String[] array = professores_query.toArray(new String[professores_query.size()]);
 		cbProfessor = new JComboBox<String>(array);
 		cbProfessor.setEditable(false);
-		String query = " insert into professor (nome, preferencia_disciplina)"
-				+ " values (?, ?)";
+		String query = " insert into professor (nome)"
+				+ " values (?)";
 		button.addActionListener(evt -> {
 			conexao.connect();
 			String name = JOptionPane.showInputDialog(parent,
@@ -273,7 +299,6 @@ public class PainelPrincipal extends JFrame {
 			try {
 				PreparedStatement preparedStmt = conexao.prepareStatement(query);
 				preparedStmt.setString (1, name);
-				preparedStmt.setString (2, "Rubble");
 				preparedStmt.execute();
 				cbProfessor.addItem(name);
 			}catch (SQLException e) {
@@ -440,12 +465,40 @@ public class PainelPrincipal extends JFrame {
 						ProfessorAndDisciplinas prAndDisciplinas = getDisciplinaPr(listaD, indexProfessor);
 						if (prAndDisciplinas.getDisciplinas().size() < 3) {
 							prAndDisciplinas.getDisciplinas().add(i);
-							if (isSkill)
+							if (isSkill) {
 								habilidadesProfessores.set(indexProfessor, prAndDisciplinas);
-							else
+								String query3 = " insert into habilidades (disciplina,professor_id)"
+										+ " values (?, ?)";
+								conexao.connect();
+								try {
+									PreparedStatement preparedStmt = conexao.prepareStatement(query3);
+									preparedStmt.setString (1, currentDisciplina);
+									preparedStmt.setInt (2, cbProfessor.getSelectedIndex() + 1);
+									preparedStmt.execute();
+								}catch (SQLException e) {
+									e.printStackTrace();
+								}
+								conexao.disconnect();
+							}
+							else{
 								preferenciasProfessores.set(indexProfessor, prAndDisciplinas);
-							msg = currentDisciplina + " adicionada(a) as " + currentSkillOrPref + "s de "
+								String query3 = " insert into preferencias (disciplina,professor_id)"
+										+ " values (?, ?)";
+								conexao.connect();
+								try {
+									PreparedStatement preparedStmt = conexao.prepareStatement(query3);
+									preparedStmt.setString (1, currentDisciplina);
+									preparedStmt.setInt (2, cbProfessor.getSelectedIndex() + 1);
+									preparedStmt.execute();
+								}catch (SQLException e) {
+									e.printStackTrace();
+								}
+								conexao.disconnect();
+
+
+								msg = currentDisciplina + " adicionada(a) as " + currentSkillOrPref + "s de "
 									+ currentProfessor;
+							}
 						} else
 							msg = currentProfessor + " antigiu o maximo de " + currentSkillOrPref + "s";
 					} else
