@@ -28,6 +28,7 @@ public class PainelPrincipal extends JFrame {
 	private List<String> professores = new ArrayList<String>();
 	private final String[] professoresPadroes = { "Walter", "Elena", "Evelyn", "Steve", "Mia", "Robert", "Lana" };
 	private List<String> professores_query = new ArrayList<String>();
+	private List<Integer> professores_query_id = new ArrayList<Integer>();
 	private List<ProfessorAndDisciplinas> preferenciasProfessores = new ArrayList<ProfessorAndDisciplinas>();
 
 	private List<ProfessorAndDisciplinas> habilidadesProfessores = new ArrayList<ProfessorAndDisciplinas>();
@@ -90,20 +91,33 @@ public class PainelPrincipal extends JFrame {
 	public String getProfessorAndDisciplina(ProfessorAndDisciplinas pAd, boolean isSkill) {
 
 		String result = professores.get(pAd.getProfessor());
-
 		if (isSkill)
 			result += " possui " + habilidade + "(s) em ";
 		else
 			result += " possui " + preferencia + "(s) em ";
-		System.out.println(result);
+
+		if (pAd.getDisciplinas().size() == 0) {
+			return null;
+		}
 		for (int i = 0; i < pAd.getDisciplinas().size(); i++) {
-			if (i == 0)
-				result += disciplinas[pAd.getDisciplinas().get(i)];
-			else
-				result += ", " + disciplinas[pAd.getDisciplinas().get(i)];
-			System.out.println(result);
+			if (i == 0){
+				if (pAd.getDisciplinas().get(i) != null){
+					result += disciplinas[pAd.getDisciplinas().get(i)];
+				}
+				else {
+					result = null;
+				}
+			}
+			else {
+				if (pAd.getDisciplinas().get(i) != null) {
+					result += ", " + disciplinas[pAd.getDisciplinas().get(i)];
+				} else {
+					result = null;
+				}
+			}
 		}
 		return result;
+
 	}
 
 	private PainelPrincipal() throws SQLException {
@@ -112,6 +126,7 @@ public class PainelPrincipal extends JFrame {
 		professoresQueryResult = conexao.query("Select id, nome from professor");
 		while (professoresQueryResult.next()) {
 			professores_query.add(professoresQueryResult.getString(2));
+			professores_query_id.add(professoresQueryResult.getInt(1));
 		}
 
 		for (int i = 0; i < professores_query.size(); i++) {
@@ -137,11 +152,12 @@ public class PainelPrincipal extends JFrame {
 						}
 					}
 				}
-				else if (result2.getString(2) != null) {
+				if (result2.getString(2) != null) {
 					for (int j = 0; j < disciplinas.length; j++) {
-					if (result2.getString(2).equals(disciplinas[j])){
-						preferencias_professores.add(j);
-					}}
+						if (result2.getString(2).equals(disciplinas[j])){
+							preferencias_professores.add(j);
+						}
+					}
 				}
 			}
 
@@ -169,7 +185,6 @@ public class PainelPrincipal extends JFrame {
 		painelPrincipal.add(getResultPainel());
 
 		validate();
-		conexao.disconnect();
 	}
 
 	public JPanel getPainelInicial() {
@@ -202,8 +217,13 @@ public class PainelPrincipal extends JFrame {
 		for (ProfessorAndDisciplinas pAd : habilidadesProfessores) {
 
 			professoresList += professores.get(pAd.getProfessor()) + ", ";
-			System.out.println(pAd.getDisciplinas());
 			JLabel labelPreferencia = new JLabel(getProfessorAndDisciplina(pAd, true));
+			painelInicial.add(labelPreferencia);
+		}
+		JLabel labeldiviver = new JLabel("\n");
+		painelInicial.add(labeldiviver);
+		for (ProfessorAndDisciplinas pAd : preferenciasProfessores) {
+			JLabel labelPreferencia = new JLabel(getProfessorAndDisciplina(pAd, false));
 			painelInicial.add(labelPreferencia);
 		}
 
@@ -422,7 +442,10 @@ public class PainelPrincipal extends JFrame {
 		bttnInicar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				start();
+				if ( professores.size() > 6){
+					start();
+				}
+
 			}
 		});
 		painelSelecao.add(bttnInicar, BorderLayout.LINE_END);
@@ -455,7 +478,34 @@ public class PainelPrincipal extends JFrame {
 					professores.add(currentProfessor);
 
 					int newProfIndex = professores.size() - 1;
-
+					if (isSkill) {
+						conexao.connect();
+						String query3 = " insert into habilidades (disciplina,professor_id)"
+								+ " values (?, ?)";
+						try {
+							PreparedStatement preparedStmt = conexao.prepareStatement(query3);
+							preparedStmt.setString (1, currentDisciplina);
+							preparedStmt.setInt (2, cbProfessor.getSelectedIndex() + professores_query_id.get(0));
+							preparedStmt.execute();
+						}catch (SQLException e) {
+							e.printStackTrace();
+						}
+						conexao.disconnect();
+					}
+					else{
+						conexao.connect();
+						String query3 = " insert into preferencias (disciplina,professor_id)"
+								+ " values (?, ?)";
+						try {
+							PreparedStatement preparedStmt = conexao.prepareStatement(query3);
+							preparedStmt.setString (1, currentDisciplina);
+							preparedStmt.setInt (2, cbProfessor.getSelectedIndex() +  professores_query_id.get(0));
+							preparedStmt.execute();
+						}catch (SQLException e) {
+							e.printStackTrace();
+						}
+						conexao.disconnect();
+					}
 					habilidadesProfessores.add(new ProfessorAndDisciplinas(newProfIndex, habilidadesProfessor));
 					preferenciasProfessores.add(new ProfessorAndDisciplinas(newProfIndex, preferenciasProfessor));
 					msg = currentProfessor + " adicionado(a) a professores e " + currentDisciplina
@@ -466,14 +516,14 @@ public class PainelPrincipal extends JFrame {
 						if (prAndDisciplinas.getDisciplinas().size() < 3) {
 							prAndDisciplinas.getDisciplinas().add(i);
 							if (isSkill) {
+								conexao.connect();
 								habilidadesProfessores.set(indexProfessor, prAndDisciplinas);
 								String query3 = " insert into habilidades (disciplina,professor_id)"
 										+ " values (?, ?)";
-								conexao.connect();
 								try {
 									PreparedStatement preparedStmt = conexao.prepareStatement(query3);
 									preparedStmt.setString (1, currentDisciplina);
-									preparedStmt.setInt (2, cbProfessor.getSelectedIndex() + 1);
+									preparedStmt.setInt (2, cbProfessor.getSelectedIndex() + professores_query_id.get(0));
 									preparedStmt.execute();
 								}catch (SQLException e) {
 									e.printStackTrace();
@@ -481,23 +531,25 @@ public class PainelPrincipal extends JFrame {
 								conexao.disconnect();
 							}
 							else{
+								conexao.connect();
 								preferenciasProfessores.set(indexProfessor, prAndDisciplinas);
 								String query3 = " insert into preferencias (disciplina,professor_id)"
 										+ " values (?, ?)";
-								conexao.connect();
+
 								try {
 									PreparedStatement preparedStmt = conexao.prepareStatement(query3);
 									preparedStmt.setString (1, currentDisciplina);
-									preparedStmt.setInt (2, cbProfessor.getSelectedIndex() + 1);
+									preparedStmt.setInt (2, cbProfessor.getSelectedIndex() +  professores_query_id.get(0));
 									preparedStmt.execute();
 								}catch (SQLException e) {
 									e.printStackTrace();
 								}
-								conexao.disconnect();
+
 
 
 								msg = currentDisciplina + " adicionada(a) as " + currentSkillOrPref + "s de "
 									+ currentProfessor;
+								conexao.disconnect();
 							}
 						} else
 							msg = currentProfessor + " antigiu o maximo de " + currentSkillOrPref + "s";
@@ -507,6 +559,7 @@ public class PainelPrincipal extends JFrame {
 				jScrollTextArea.setText(jScrollTextArea.getText() + "   " + msg + "\n");
 				System.out.println(msg);
 				break;
+
 			}
 		}
 	}
@@ -515,6 +568,8 @@ public class PainelPrincipal extends JFrame {
 		// 0x0 => 0, 1, 12, 13 // 0x1 => 6, 7, 18, 19 // 0x2 => 12, 13, 24, 25
 		// 1x0 => 2, 3, 14, 15 // 1x1 => 8, 9, 20, 21 // 1x2 => 14, 15, 26, 27
 		// 2x0 => 4, 5, 16, 17 // 2x1 => 10, 11, 22, 23 // 2x2 => 16, 17, 28, 29
+
+
 		System.out.println("\nProfessores => " + professores + "\n");
 
 		int first = 0;
