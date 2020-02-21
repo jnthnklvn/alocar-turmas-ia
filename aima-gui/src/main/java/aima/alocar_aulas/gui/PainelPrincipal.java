@@ -112,11 +112,14 @@ public class PainelPrincipal extends JFrame {
 			professores_query.add(result.getString(1));
 		}
 
+
+
 		for (int i = 0; i < professores_query.size(); i++) {
 			List<Integer> habs = new ArrayList<Integer>();
 			habs.add(professores_query.size() - 1 - i);
 			professores.add(professores_query.get(i));
 			preferenciasProfessores.add(new ProfessorAndDisciplinas(i, new ArrayList<Integer>()));
+			System.out.println(habs);
 			habilidadesProfessores.add(new ProfessorAndDisciplinas(i, habs));
 		}
 
